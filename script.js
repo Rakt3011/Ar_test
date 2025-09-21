@@ -56,14 +56,24 @@ const plantInfo = {
             plantSelector.addEventListener('change', (e) => {
                 selectedPlant = e.target.value;
                 if (selectedPlant) {
+                    console.log('Selected plant:', selectedPlant);
                     plantModel.setAttribute('gltf-model', `models/${selectedPlant}.glb`);
-                    plantModel.setAttribute('scale', `${initialScale} ${initialScale} ${initialScale}`);
+                    plantModel.setAttribute('scale', '1 1 1');
+                    plantModel.setAttribute('position', '0 0 -2');
                     plantModel.setAttribute('visible', 'true');
                     updatePlantInfo(plantInfo[selectedPlant].name, plantInfo[selectedPlant].info);
                 } else {
                     plantModel.setAttribute('visible', 'false');
                 }
             });
+    // Debug: log model load success/error
+    plantModel.addEventListener('model-loaded', () => {
+        console.log('Model loaded successfully:', selectedPlant);
+    });
+    plantModel.addEventListener('model-error', (err) => {
+        console.error('Error loading model:', err);
+        alert('Error loading model. Check the model file and path.');
+    });
 
             // Touch gestures for move/zoom
             const scene = document.querySelector('a-scene');
