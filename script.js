@@ -66,6 +66,7 @@ const plantInfo = {
                     plantModel.setAttribute('gltf-model', `models/${selectedPlant}.glb`);
                     plantModel.setAttribute('scale', '1 1 1');
                     plantModel.setAttribute('position', '0 0 -2');
+                    plantModel.setAttribute('rotation', '0 0 0');
                     plantModel.setAttribute('visible', 'true');
                     updatePlantInfo(plantInfo[selectedPlant].name, plantInfo[selectedPlant].info);
                 } else {
@@ -87,27 +88,32 @@ const plantInfo = {
         showDebug('Error loading model! Check file and path.');
     });
 
-            // Touch gestures for move/zoom
+            // Touch gestures for move/zoom/rotate
             const scene = document.querySelector('a-scene');
+            let lastTouches = [];
+            let lastDistance = null;
+            let lastAngle = null;
             scene.addEventListener('touchstart', (e) => {
                 if (!plantModel.getAttribute('visible')) return;
-                if (e.touches.length === 1) {
-                    lastTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-                } else if (e.touches.length === 2) {
+                lastTouches = Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
+                if (e.touches.length === 2) {
                     const dx = e.touches[0].clientX - e.touches[1].clientX;
                     const dy = e.touches[0].clientY - e.touches[1].clientY;
                     lastDistance = Math.sqrt(dx * dx + dy * dy);
+                    lastAngle = Math.atan2(dy, dx);
                 }
             });
             scene.addEventListener('touchmove', (e) => {
                 if (!plantModel.getAttribute('visible')) return;
-                if (e.touches.length === 1 && lastTouch) {
-                    const dx = e.touches[0].clientX - lastTouch.x;
-                    const dy = e.touches[0].clientY - lastTouch.y;
+                if (e.touches.length === 1 && lastTouches.length === 1) {
+                    // One finger drag to move
+                    const dx = e.touches[0].clientX - lastTouches[0].x;
+                    const dy = e.touches[0].clientY - lastTouches[0].y;
                     const pos = plantModel.getAttribute('position');
                     plantModel.setAttribute('position', `${pos.x + dx * 0.01} ${pos.y} ${pos.z + dy * 0.01}`);
-                    lastTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-                } else if (e.touches.length === 2 && lastDistance) {
+                    lastTouches = [{ x: e.touches[0].clientX, y: e.touches[0].clientY }];
+                } else if (e.touches.length === 2 && lastTouches.length === 2) {
+                    // Pinch to zoom
                     const dx = e.touches[0].clientX - e.touches[1].clientX;
                     const dy = e.touches[0].clientY - e.touches[1].clientY;
                     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -115,11 +121,24 @@ const plantInfo = {
                     const factor = distance / lastDistance;
                     plantModel.setAttribute('scale', `${scale.x * factor} ${scale.y * factor} ${scale.z * factor}`);
                     lastDistance = distance;
+
+                    // Two-finger rotate
+                    const angle = Math.atan2(dy, dx);
+                    const rot = plantModel.getAttribute('rotation');
+                    const deltaAngle = (angle - lastAngle) * (180 / Math.PI); // Convert to degrees
+                    plantModel.setAttribute('rotation', `${rot.x} ${rot.y + deltaAngle} ${rot.z}`);
+                    lastAngle = angle;
+
+                    lastTouches = [
+                        { x: e.touches[0].clientX, y: e.touches[0].clientY },
+                        { x: e.touches[1].clientX, y: e.touches[1].clientY }
+                    ];
                 }
             });
             scene.addEventListener('touchend', () => {
-                lastTouch = null;
+                lastTouches = [];
                 lastDistance = null;
+                lastAngle = null;
             });
 
             // Mouse wheel for desktop zoom
