@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Gesture and Mouse Controls ---
+    const canvas = scene.canvas;
     let isDragging = false;
     let dragStart = { x: 0, y: 0 };
     let lastTouches = [];
@@ -101,8 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastAngle = null;
 
     // Touch gestures for move/zoom/rotate
-    gestureArea.addEventListener('touchstart', (e) => {
+    canvas.addEventListener('touchstart', (e) => {
         if (!plantModel.getAttribute('visible')) return;
+        showDebug("Touch started on model");
         lastTouches = Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
         if (e.touches.length === 1) {
             isDragging = true;
@@ -116,11 +118,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    gestureArea.addEventListener('touchmove', (e) => {
+    canvas.addEventListener('touchmove', (e) => {
         if (!plantModel.getAttribute('visible')) return;
         e.preventDefault(); // Prevent page scrolling
 
         if (e.touches.length === 1 && isDragging) {
+            showDebug("Moving model (1 finger)");
             // One finger drag to move
             const dx = e.touches[0].clientX - dragStart.x;
             const dy = e.touches[0].clientY - dragStart.y;
@@ -129,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
 
         } else if (e.touches.length === 2 && lastDistance) {
+            showDebug("Zooming/Rotating model (2 fingers)");
             // Pinch to zoom
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -149,7 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    gestureArea.addEventListener('touchend', () => {
+    canvas.addEventListener('touchend', () => {
+        if (!plantModel.getAttribute('visible')) return;
+        showDebug("Touch ended");
         isDragging = false;
         lastTouches = [];
         lastDistance = null;
@@ -157,22 +163,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Mouse controls for desktop
-    gestureArea.addEventListener('wheel', (e) => {
+    canvas.addEventListener('wheel', (e) => {
         if (!plantModel.getAttribute('visible')) return;
+        showDebug("Zooming with mouse wheel");
         e.preventDefault();
         const scale = plantModel.getAttribute('scale');
         const factor = e.deltaY < 0 ? 1.1 : 0.9;
         plantModel.setAttribute('scale', `${scale.x * factor} ${scale.y * factor} ${scale.z * factor}`);
     });
 
-    gestureArea.addEventListener('mousedown', (e) => {
+    canvas.addEventListener('mousedown', (e) => {
         if (!plantModel.getAttribute('visible') || e.button !== 0) return; // Only main left-click
+        showDebug("Mouse drag started");
         isDragging = true;
         dragStart = { x: e.clientX, y: e.clientY };
     });
 
-    gestureArea.addEventListener('mousemove', (e) => {
+    canvas.addEventListener('mousemove', (e) => {
         if (!isDragging || !plantModel.getAttribute('visible')) return;
+        showDebug("Dragging with mouse");
         const rot = plantModel.getAttribute('rotation');
         const pos = plantModel.getAttribute('position');
 
@@ -187,11 +196,14 @@ document.addEventListener('DOMContentLoaded', () => {
         dragStart = { x: e.clientX, y: e.clientY };
     });
 
-    gestureArea.addEventListener('mouseup', () => {
+    canvas.addEventListener('mouseup', () => {
+        if (!plantModel.getAttribute('visible')) return;
+        showDebug("Mouse drag ended");
         isDragging = false;
     });
 
-    gestureArea.addEventListener('mouseleave', () => {
+    canvas.addEventListener('mouseleave', () => {
+        if (!plantModel.getAttribute('visible')) return;
         isDragging = false;
     });
 });

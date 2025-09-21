@@ -75,10 +75,10 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: calc(100% - 200px); /* Leave space for UI at bottom */
+    width: 100vw;
+    height: 100vh;
     z-index: 1;
-    touch-action: none; /* Prevents default touch behaviors */
+    touch-action: none;
 }
 
 /* Helper text for touch instructions */
