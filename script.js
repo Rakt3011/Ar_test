@@ -54,10 +54,9 @@ const plantInfo = {
 
             // Handle plant selection
             const debugMsg = document.getElementById('debug-message');
-            function showDebug(msg, duration = 3000) {
+            function showDebug(msg) {
                 debugMsg.textContent = msg;
                 debugMsg.style.display = 'block';
-                setTimeout(() => { debugMsg.style.display = 'none'; }, duration);
             }
 
             plantSelector.addEventListener('change', (e) => {
@@ -70,15 +69,22 @@ const plantInfo = {
                     plantModel.setAttribute('visible', 'true');
                     updatePlantInfo(plantInfo[selectedPlant].name, plantInfo[selectedPlant].info);
                 } else {
+                    showDebug('No model selected');
                     plantModel.setAttribute('visible', 'false');
                 }
             });
     // Debug: log model load success/error
     plantModel.addEventListener('model-loaded', () => {
-        showDebug('Model loaded successfully: ' + selectedPlant);
+        // Check if model is visible and scale is reasonable
+        let scale = plantModel.getAttribute('scale');
+        let msg = 'Model loaded successfully: ' + selectedPlant;
+        if (scale.x < 0.05 || scale.y < 0.05 || scale.z < 0.05) {
+            msg += ' (Warning: Model may be too small)';
+        }
+        showDebug(msg);
     });
     plantModel.addEventListener('model-error', (err) => {
-        showDebug('Error loading model! Check file and path.', 5000);
+        showDebug('Error loading model! Check file and path.');
     });
 
             // Touch gestures for move/zoom
