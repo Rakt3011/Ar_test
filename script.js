@@ -53,10 +53,17 @@ const plantInfo = {
             let dragStart = null;
 
             // Handle plant selection
+            const debugMsg = document.getElementById('debug-message');
+            function showDebug(msg, duration = 3000) {
+                debugMsg.textContent = msg;
+                debugMsg.style.display = 'block';
+                setTimeout(() => { debugMsg.style.display = 'none'; }, duration);
+            }
+
             plantSelector.addEventListener('change', (e) => {
                 selectedPlant = e.target.value;
                 if (selectedPlant) {
-                    console.log('Selected plant:', selectedPlant);
+                    showDebug('Loading model: ' + selectedPlant);
                     plantModel.setAttribute('gltf-model', `models/${selectedPlant}.glb`);
                     plantModel.setAttribute('scale', '1 1 1');
                     plantModel.setAttribute('position', '0 0 -2');
@@ -68,11 +75,10 @@ const plantInfo = {
             });
     // Debug: log model load success/error
     plantModel.addEventListener('model-loaded', () => {
-        console.log('Model loaded successfully:', selectedPlant);
+        showDebug('Model loaded successfully: ' + selectedPlant);
     });
     plantModel.addEventListener('model-error', (err) => {
-        console.error('Error loading model:', err);
-        alert('Error loading model. Check the model file and path.');
+        showDebug('Error loading model! Check file and path.', 5000);
     });
 
             // Touch gestures for move/zoom
