@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medicinal Plants AR Experience - Interactive 3D View</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-xr@1.0.0/dist/aframe-xr.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Debug logging
+        window.addEventListener('load', () => {
+            console.log('Page loaded');
+            if (AFRAME) console.log('A-Frame loaded successfully');
+            if (THREEx) console.log('AR.js loaded successfully');
+        });
+    </script>
+</head>
+<body style="margin: 0; overflow: hidden;">
+    <div class="ui-container">
+        <div class="mode-toggle">
+            <button id="arMode" class="mode-button">Switch AR Mode (Marker/Markerless)</button>
+        </div>
+        <select id="plantSelector" class="plant-dropdown" aria-label="Select a medicinal plant">
+            <option value="">Select a Medicinal Plant</option>
+            <option value="Ahwagandha">Ashwagandha</option>
+            <option value="Cardamom">Cardamom</option>
+            <option value="Cinnamon">Cinnamon</option>
+            <option value="clove">Clove</option>
+            <option value="tulsi">Tulsi (Holy Basil)</option>
+            <option value="Turmeric">Turmeric</option>
+        </select>
+        <div class="info-card" id="plantInfo">
+            <h2>Select a plant from the dropdown</h2>
+            <p>The 3D model will appear in your space</p>
+        </div>
+        <div id="gesture-area" class="gesture-area">
+            <!-- Touch and mouse events will be handled here -->
+        </div>
+    </div>
+
+    <!-- WebXR AR Scene for surface placement -->
+    <a-scene
+        vr-mode-ui="enabled: false"
+        embedded
+        xr-mode="ar"
+        xr-hit-test="true"
+        renderer="colorManagement: true; physicallyCorrectLights: true"
+        device-orientation-permission-ui="enabled: true"
+    >
+        <a-camera></a-camera>
+        <a-light type="ambient" intensity="1"></a-light>
+        <a-light type="directional" position="1 1 1" intensity="0.5"></a-light>
+        <a-entity id="plant-model" visible="false"></a-entity>
+    </a-scene>
+
+    <script src="script.js"></script>
+</body>
+</html>
