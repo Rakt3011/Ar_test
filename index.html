@@ -4,6 +4,7 @@
     <title>Medicinal Plants AR Experience - Interactive 3D View</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-xr@1.0.0/dist/aframe-xr.min.js"></script>
     <link rel="stylesheet" href="styles.css">
     <script>
@@ -36,6 +37,10 @@
         <div id="gesture-area" class="gesture-area">
             <!-- Touch and mouse events will be handled here -->
         </div>
+        <div id="ar-support-message" style="color: red; text-align: center; margin-top: 10px; display: none;">
+            AR or camera not supported in this browser. Please use Chrome (Android) or Safari (iOS) and ensure HTTPS.
+        </div>
+        <button id="requestCamera" style="display:none; margin: 10px auto;">Request Camera Permission</button>
     </div>
 
     <!-- WebXR AR Scene for surface placement -->
@@ -53,6 +58,41 @@
         <a-entity id="plant-model" visible="false"></a-entity>
     </a-scene>
 
+    <script>
+        // Check AR support and show message/button if needed
+        window.addEventListener('DOMContentLoaded', function() {
+            const arSupportMsg = document.getElementById('ar-support-message');
+            const requestBtn = document.getElementById('requestCamera');
+            // Check for WebXR AR support
+            if (!navigator.xr || !navigator.xr.isSessionSupported) {
+                arSupportMsg.style.display = 'block';
+                requestBtn.style.display = 'none';
+            } else {
+                navigator.xr.isSessionSupported('immersive-ar').then(supported => {
+                    if (!supported) {
+                        arSupportMsg.style.display = 'block';
+                        requestBtn.style.display = 'none';
+                    } else {
+                        arSupportMsg.style.display = 'none';
+                        requestBtn.style.display = 'block';
+                    }
+                });
+            }
+            requestBtn.onclick = function() {
+                // Try to request camera permission
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ video: true })
+                        .then(stream => {
+                            requestBtn.style.display = 'none';
+                        })
+                        .catch(err => {
+                            arSupportMsg.textContent = 'Camera permission denied or not available.';
+                            arSupportMsg.style.display = 'block';
+                        });
+                }
+            };
+        });
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
