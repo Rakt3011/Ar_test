@@ -58,32 +58,15 @@ const plantInfo = {
                 if (selectedPlant) {
                     plantModel.setAttribute('gltf-model', `models/${selectedPlant}.glb`);
                     plantModel.setAttribute('scale', `${initialScale} ${initialScale} ${initialScale}`);
-                    plantModel.setAttribute('visible', 'false'); // Wait for placement
+                    plantModel.setAttribute('visible', 'true');
                     updatePlantInfo(plantInfo[selectedPlant].name, plantInfo[selectedPlant].info);
+                } else {
+                    plantModel.setAttribute('visible', 'false');
                 }
             });
 
-            // Surface placement: mobile (WebXR hit-test) and desktop (click)
-            const scene = document.querySelector('a-scene');
-            scene.addEventListener('xr-hit-test-select', (event) => {
-                if (!selectedPlant) return;
-                const hit = event.detail;
-                plantModel.setAttribute('position', hit.position);
-                plantModel.setAttribute('visible', 'true');
-            });
-            // Desktop: click to place
-            scene.addEventListener('click', (e) => {
-                if (!selectedPlant) return;
-                // Get normalized coordinates
-                const bounds = scene.getBoundingClientRect();
-                const x = ((e.clientX - bounds.left) / bounds.width) * 2 - 1;
-                const y = -(((e.clientY - bounds.top) / bounds.height) * 2 - 1);
-                // Place at fixed distance in front of camera
-                plantModel.setAttribute('position', `${x} 0 ${-2}`);
-                plantModel.setAttribute('visible', 'true');
-            });
-
             // Touch gestures for move/zoom
+            const scene = document.querySelector('a-scene');
             scene.addEventListener('touchstart', (e) => {
                 if (!plantModel.getAttribute('visible')) return;
                 if (e.touches.length === 1) {
